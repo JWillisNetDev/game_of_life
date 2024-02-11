@@ -1,4 +1,4 @@
-use crate::{GameBoard, Cell};
+use crate::{Cell, GameBoard};
 
 #[derive(PartialEq, Copy, Clone, Debug)]
 pub struct Coordinate<'a> {
@@ -64,25 +64,34 @@ mod tests {
         assert_eq!(board, iter.game_board as *const _); // Same reference
 
         let actual = iter.next().unwrap();
-        assert_eq!(Coordinate {
-            x: 0,
-            y: 0,
-            cell: &Cell(false),
-        }, actual);
+        assert_eq!(
+            Coordinate {
+                x: 0,
+                y: 0,
+                cell: &Cell(false),
+            },
+            actual
+        );
 
         let actual = iter.next().unwrap();
-        assert_eq!(Coordinate {
-            x: 1,
-            y: 0,
-            cell: &Cell(true),
-        }, actual);
+        assert_eq!(
+            Coordinate {
+                x: 1,
+                y: 0,
+                cell: &Cell(true),
+            },
+            actual
+        );
 
         let actual = iter.next().unwrap();
-        assert_eq!(Coordinate {
-            x: 2,
-            y: 0,
-            cell: &Cell(false),
-        }, actual);
+        assert_eq!(
+            Coordinate {
+                x: 2,
+                y: 0,
+                cell: &Cell(false),
+            },
+            actual
+        );
 
         assert!(iter.next().is_none());
     }

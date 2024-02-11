@@ -1,8 +1,9 @@
-use game_of_life::{GameBoard, bmp};
+use game_of_life::{bmp, GameBoard};
 
 fn main() {
     let mut board = GameBoard::new(100, 100);
-    let board = board.enable(49, 49)
+    let board = board
+        .enable(49, 49)
         .enable(50, 49)
         .enable(51, 49)
         .enable(51, 50)

@@ -3,7 +3,7 @@ pub mod iter;
 
 use std::fmt::Formatter;
 
-#[derive(Clone, Copy, Debug, PartialEq,)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Cell(bool);
 
 impl Cell {
@@ -16,7 +16,7 @@ impl Cell {
 pub struct GameBoard {
     width: usize,
     height: usize,
-    state: Vec::<Cell>
+    state: Vec<Cell>,
 }
 
 impl std::fmt::Debug for GameBoard {
@@ -24,12 +24,13 @@ impl std::fmt::Debug for GameBoard {
         writeln!(f, "Width: {}, Height: {}", self.width, self.height)?;
         for y in 0..self.height {
             let slice = &self.state[(y * self.width)..(y * self.width + self.width)];
-            let text = slice.iter()
+            let text = slice
+                .iter()
                 .map(|cell| match cell {
                     Cell(true) => "1",
                     _ => "0",
                 })
-                .collect::<Vec::<&str>>()
+                .collect::<Vec<&str>>()
                 .join(", ");
             writeln!(f, "{text}")?;
         }
@@ -42,7 +43,11 @@ impl GameBoard {
         let capacity = width * height;
         let board = vec![Cell(false); capacity];
 
-        Self { width, height, state: board }
+        Self {
+            width,
+            height,
+            state: board,
+        }
     }
 
     pub fn size(&self) -> usize {
@@ -75,27 +80,24 @@ impl GameBoard {
 
     pub fn next(&mut self) {
         /*  Rules of Game of Life
-            1. Any live cell with fewer than 2 neighbors dies.
-            2. Any live cell with 2 or 3 neighbors lives.
-            3. Any live cell with more than 3 neighbors dies.
-            4. Any dead cell with exactly 3 neighbors becomes a live cell. */
+        1. Any live cell with fewer than 2 neighbors dies.
+        2. Any live cell with 2 or 3 neighbors lives.
+        3. Any live cell with more than 3 neighbors dies.
+        4. Any dead cell with exactly 3 neighbors becomes a live cell. */
 
         let size = self.size();
         let mut next_state = vec![Cell(false); size];
-        for i in 0..size {
+        for (i, cell) in self.state.iter().enumerate() {
             let x = i % self.width;
             let y = i / self.width;
             let alive = self.get_alive_neighbors(x, y);
-            let cell = self.state[i];
 
-            if cell.is_alive() && alive < 2 {
-               next_state[i] = Cell(false);
-            } else if cell.is_alive() && alive > 3 {
+            if cell.is_alive() && !(2..=3).contains(&alive) {
                 next_state[i] = Cell(false);
             } else if !cell.is_alive() && alive == 3 {
                 next_state[i] = Cell(true);
             } else {
-                next_state[i] = cell;
+                next_state[i] = *cell;
             }
         }
 
@@ -107,12 +109,17 @@ impl GameBoard {
         }
 
         let mut neighbors = [Cell(false); 8];
-        for i in 0..8usize {
-            if (x == 0 && i % 3 == 0) || (y == 0 && i / 3 == 0) { continue; }
+        for (mut i, cell) in neighbors.iter_mut().enumerate() {
+            if (x == 0 && i % 3 == 0) || (y == 0 && i / 3 == 0) {
+                continue;
+            }
 
-            let x = x.saturating_add_signed(if i >= 4 { (i as isize + 1) % 3 - 1 } else { i as isize % 3 - 1 });
-            let y = y.saturating_add_signed(if i >= 4 { (i as isize + 1) / 3 - 1 } else { i as isize / 3 - 1 });
-            neighbors[i] = self.get(x, y).unwrap_or(Cell(false));
+            if i > 3 {
+                i += 1;
+            }
+            let x = x.saturating_add_signed(i as isize % 3 - 1);
+            let y = y.saturating_add_signed(i as isize / 3 - 1);
+            *cell = self.get(x, y).unwrap_or(Cell(false));
         }
 
         Some(neighbors)
@@ -120,9 +127,7 @@ impl GameBoard {
 
     fn get_alive_neighbors(&self, x: usize, y: usize) -> usize {
         if let Some(neighbors) = self.get_neighbors(x, y) {
-            neighbors.iter()
-                .filter(|cell| **cell == Cell(true))
-                .count()
+            neighbors.iter().filter(|cell| *cell == &Cell(true)).count()
         } else {
             0
         }
@@ -189,16 +194,17 @@ mod tests {
     #[test]
     fn it_gets_next_state() {
         let mut board = GameBoard::new(3, 3);
-        board.enable(0, 0)
+        board
+            .enable(0, 0)
             .enable(1, 0)
             .enable(0, 1)
             .enable(1, 1)
             .enable(2, 2);
 
         let expected_state = &[
-            &[Cell(true ), Cell(true ), Cell(false)],
-            &[Cell(true ), Cell(false), Cell(true )],
-            &[Cell(false), Cell(true ), Cell(false)],
+            &[Cell(true), Cell(true), Cell(false)],
+            &[Cell(true), Cell(false), Cell(true)],
+            &[Cell(false), Cell(true), Cell(false)],
         ];
 
         dbg!(board.clone());
@@ -206,7 +212,7 @@ mod tests {
 
         dbg!(board.clone());
         for i in 0..9 {
-            assert_eq!(expected_state[i%3][i/3], board.state[i]);
+            assert_eq!(expected_state[i % 3][i / 3], board.state[i]);
         }
     }
 
