@@ -1,5 +1,5 @@
-mod bmp;
-mod iter;
+pub mod bmp;
+pub mod iter;
 
 use std::fmt::Formatter;
 
