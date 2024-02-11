@@ -2,23 +2,9 @@ use crate::{GameBoard, Cell};
 
 #[derive(PartialEq, Copy, Clone, Debug)]
 pub struct Coordinate<'a> {
-    x: usize,
-    y: usize,
-    cell: &'a Cell,
-}
-
-impl<'a> Coordinate<'a> {
-    pub fn x(&self) -> usize {
-        self.x
-    }
-
-    pub fn y(&self) -> usize {
-        self.y
-    }
-
-    pub fn cell(&self) -> &'a Cell {
-        self.cell
-    }
+    pub x: usize,
+    pub y: usize,
+    pub cell: &'a Cell,
 }
 
 impl<'a> Iterator for CoordinateIter<'a> {
