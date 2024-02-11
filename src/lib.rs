@@ -101,24 +101,18 @@ impl GameBoard {
 
         self.state = next_state;
     }
-    fn get_neighbors(&self, x: usize, y: usize) -> Option<[Option<Cell>; 9]> {
+    fn get_neighbors(&self, x: usize, y: usize) -> Option<[Cell; 8]> {
         if x >= self.width || y >= self.height {
             return None;
         }
 
-        let mut neighbors = [None; 9];
-        for j in 0..3 {
-            for k in 0..3 {
-                if (x == 0 && j == 0) || (y == 0 && k == 0) {
-                    neighbors[j * 3 + k] = Some(Cell(false));
-                }
-                else if j == 1 && k == 1 {
-                    neighbors[j * 3 + k] = None;
-                }
-                else {
-                    neighbors[j * 3 + k] = self.get(x + j - 1, y + k - 1);
-                }
-            }
+        let mut neighbors = [Cell(false); 8];
+        for i in 0..8usize {
+            if (x == 0 && i % 3 == 0) || (y == 0 && i / 3 == 0) { continue; }
+
+            let x = x.saturating_add_signed(if i >= 4 { (i as isize + 1) % 3 - 1 } else { i as isize % 3 - 1 });
+            let y = y.saturating_add_signed(if i >= 4 { (i as isize + 1) / 3 - 1 } else { i as isize / 3 - 1 });
+            neighbors[i] = self.get(x, y).unwrap_or(Cell(false));
         }
 
         Some(neighbors)
@@ -127,7 +121,7 @@ impl GameBoard {
     fn get_alive_neighbors(&self, x: usize, y: usize) -> usize {
         if let Some(neighbors) = self.get_neighbors(x, y) {
             neighbors.iter()
-                .filter(|cell| **cell == Some(Cell(true)))
+                .filter(|cell| **cell == Cell(true))
                 .count()
         } else {
             0
@@ -163,15 +157,14 @@ mod tests {
         ]);
 
         let neighbors = board.get_neighbors(1, 1).unwrap();
-        assert_eq!(neighbors[0], Some(Cell(true)));
-        assert_eq!(neighbors[1], Some(Cell(false)));
-        assert_eq!(neighbors[2], Some(Cell(true)));
-        assert_eq!(neighbors[3], Some(Cell(false)));
-        assert_eq!(neighbors[4], None);
-        assert_eq!(neighbors[5], Some(Cell(false)));
-        assert_eq!(neighbors[6], Some(Cell(true)));
-        assert_eq!(neighbors[7], Some(Cell(false)));
-        assert_eq!(neighbors[8], Some(Cell(true)));
+        assert_eq!(neighbors[0], Cell(true));
+        assert_eq!(neighbors[1], Cell(false));
+        assert_eq!(neighbors[2], Cell(true));
+        assert_eq!(neighbors[3], Cell(false));
+        assert_eq!(neighbors[4], Cell(false));
+        assert_eq!(neighbors[5], Cell(true));
+        assert_eq!(neighbors[6], Cell(false));
+        assert_eq!(neighbors[7], Cell(true));
     }
 
     #[test]
