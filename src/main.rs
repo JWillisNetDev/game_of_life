@@ -11,34 +11,22 @@ fn main() {
         .enable(49, 51)
         .enable(49, 50);
 
-    let mut name_factory = IncrementalNameFactory::new("game_board".to_string(), ".bmp".to_string());
-
-    bmp::into_bmp(board, name_factory.next().as_str());
-    for i in 0..=10 {
+    let root = "output";
+    bmp::into_bmp(board, get_path(root, 0).as_str());
+    for i in 1..10 {
         board.next();
-        bmp::into_bmp(board, name_factory.next().as_str());
+        bmp::into_bmp(board, get_path(root, i).as_str());
     }
 }
 
-struct IncrementalNameFactory {
-    root: String,
-    extension: String,
-    count: usize,
-}
+fn get_path(root: &str, count: usize) -> String {
+    let mut path = String::new();
 
-impl IncrementalNameFactory {
-    pub fn new(root: String, extension: String) -> Self {
-        IncrementalNameFactory { root, extension, count: 0 }
+    path.push_str(root);
+    if count > 0 {
+        path.push_str(format!("_({count})").as_str());
     }
+    path.push_str(".bmp");
 
-    pub fn next(&mut self) -> String {
-        let mut str = String::new();
-        str.push_str(self.root.as_str());
-        if self.count > 0 {
-            str.push_str(format!("_({})", self.count).as_str());
-        }
-        str.push_str(self.extension.as_str());
-        self.count += 1;
-        str
-    }
+    path
 }
